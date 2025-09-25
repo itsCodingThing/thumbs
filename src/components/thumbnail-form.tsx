@@ -4,7 +4,7 @@ import { open as fileOpen } from "@tauri-apps/plugin-dialog";
 
 import Button from "@/components/button";
 import Input from "@/components/input";
-import generateThumbnails from "@/libs/ffmpeg";
+import { generateThumbnail } from "@/libs/ffmpeg";
 import Card from "@/components/card";
 
 export default function ThumbnailForm() {
@@ -40,7 +40,7 @@ export default function ThumbnailForm() {
     setIsLoading(true);
 
     try {
-      await generateThumbnails(paths.source, paths.destination);
+      await generateThumbnail(paths.source, paths.destination);
     } catch (error) {
       console.error(error);
     } finally {
@@ -50,26 +50,19 @@ export default function ThumbnailForm() {
 
   return (
     <Card>
-      <form class="grid gap-4 grid-cols-2">
+      <form class="space-y-2 grid gap-4 grid-cols-2">
         <div class="space-y-2">
-          <label class="text-sm font-medium">Select video file</label>
-          <input
-            type="file"
-            accept="video/*"
-            class="block w-full cursor-pointer rounded-md border border-input bg-card px-3 py-2 text-sm"
-          />
+          <Input value={paths.source} placeholder="select file path" />
           <Button onClick={selectFile}>select file</Button>
         </div>
         <div class="space-y-2">
-          <label class="text-sm font-medium">Choose destination folder</label>
-          <input
-            type="file"
-            accept="video/*"
-            class="block w-full cursor-pointer rounded-md border border-input bg-card px-3 py-2 text-sm"
-          />
-          <Button onClick={selectFile}>select file</Button>
+          <Input value={paths.destination} placeholder="choose file save" />
+          <Button onClick={selectSave}>select file</Button>
         </div>
       </form>
+      <Button onClick={onClickGenThumb}>
+        {isLoading() ? "Generating..." : "Generate Thumbnails"}
+      </Button>
     </Card>
   );
 }

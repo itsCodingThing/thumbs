@@ -12,18 +12,18 @@
       "identifier": "shell:allow-execute",
       "allow": [
         {
+          "name": "binaries/ffprobe",
+          "args": true,
+          "sidecar": true
+        }
+      ]
+    },
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
           "name": "binaries/ffmpeg",
-          "args": [
-            "-i",
-            {
-              "validator": "\\S+"
-            },
-            "-vf",
-            "fps=1/10",
-            {
-              "validator": "\\S+"
-            }
-          ],
+          "args": true,
           "sidecar": true
         }
       ]

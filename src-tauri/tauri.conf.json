@@ -22,7 +22,7 @@
     }
   },
   "bundle": {
-    "externalBin": ["binaries/ffmpeg"],
+    "externalBin": ["binaries/ffmpeg", "binaries/ffprobe"],
     "active": true,
     "targets": "all",
     "icon": [

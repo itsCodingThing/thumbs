@@ -4,7 +4,7 @@ export default function Input(props: ComponentProps<"input">) {
 	const inputProps = mergeProps(
 		{
 			class:
-				"border rounded-sm border-blue-900 focus:border-blue-900 text-white p-1",
+				"block w-full cursor-pointer rounded-md border border-input bg-card px-3 py-2 text-sm",
 			type: "text",
 		},
 		props,
