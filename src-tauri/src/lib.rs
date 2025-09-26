@@ -9,7 +9,7 @@ pub fn run() {
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
 
-            let _ = window.set_resizable(false);
+            let _ = window.set_resizable(true);
 
             Ok(())
         })

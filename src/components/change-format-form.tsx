@@ -1,117 +1,95 @@
 import { createSignal, For } from "solid-js";
 import { createStore } from "solid-js/store";
-import { open as fileOpen, save as fileSave } from "@tauri-apps/plugin-dialog";
+import { save as fileSave } from "@tauri-apps/plugin-dialog";
 
 import Button from "@/components/button";
-import Card from "@/components/card";
-import { changeFormat } from "@/libs/ffmpeg";
+import {
+	changeFormat,
+	isSupportedVideoFormat,
+	SupportedVideoFormats,
+	type VideoFormat,
+} from "@/libs/ffmpeg";
+import Select from "./select";
+import Input from "./input";
 
-const formats = ["avi", "mp4", "mkv"];
+interface FormatFormStore {
+	source: string;
+	destination: string;
+	format: VideoFormat;
+	reencode: boolean;
+}
 
 export default function ChangeFormatForm() {
-  const [isLoading, setIsLoading] = createSignal(false);
-  const [state, setState] = createStore({
-    source: "",
-    destination: "",
-    format: "",
-    reencode: false,
-  });
+	const [isLoading, setIsLoading] = createSignal(false);
+	const [state, setState] = createStore<FormatFormStore>({
+		source: "",
+		destination: "",
+		format: "avi",
+		reencode: false,
+	});
 
-  const selectFile = async () => {
-    const blob = await fileOpen({
-      multiple: false,
-      directory: false,
-    });
+	const selectSave = async () => {
+		const blob = await fileSave({
+			filters: [
+				{
+					name: "Save File",
+					extensions: SupportedVideoFormats.slice(),
+				},
+			],
+		});
 
-    if (blob) {
-      setState("source", blob);
-    }
-  };
+		if (!blob) {
+			throw new Error("select path where to save");
+		}
 
-  const selectSave = async () => {
-    const blob = await fileSave({
-      filters: [
-        {
-          name: "Save File",
-          extensions: formats,
-        },
-      ],
-    });
+		setState("destination", blob);
+	};
 
-    if (!blob) {
-      throw new Error("select path where to save");
-    }
+	const onClickChangeFormat = async () => {
+		setIsLoading(true);
 
-    setState("destination", blob);
-  };
+		try {
+			await changeFormat({
+				source: state.source,
+				destination: state.destination,
+				format: state.format,
+				reencode: true,
+			});
+		} catch (error) {
+			console.error(error);
+		}
 
-  const onClickChangeFormat = async () => {
-    console.log(state);
-    setIsLoading(true);
+		setIsLoading(false);
+	};
 
-    try {
-      await changeFormat({
-        source: state.source,
-        destination: state.destination,
-        format: state.format,
-        reencode: true,
-      });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <Card>
-      <form class="space-y-2 flex flex-col gap-2">
-        <div class="space-y-2">
-          <label class="text-sm font-medium">Re-encode</label>
-          <input
-            type="checkbox"
-            onChange={(e) => {
-              setState("reencode", e.currentTarget.checked);
-            }}
-          />
-        </div>
-        <div class="space-y-2">
-          <Button
-            onClick={async () => {
-              await selectFile();
-            }}
-          >
-            {state.source.length ? state.source : "select file"}
-          </Button>
-        </div>
-        <div class="space-y-2">
-          <Button
-            onClick={async () => {
-              await selectSave();
-            }}
-          >
-            {state.destination.length ? state.destination : "select save"}
-          </Button>
-        </div>
-        <div class="space-y-2">
-          <label class="text-sm font-medium">Select Format </label>
-          <select
-            onChange={(e) => {
-              console.log(e.currentTarget.value);
-              setState("format", e.currentTarget.value);
-            }}
-          >
-            <For each={formats}>
-              {(format) => {
-                return <option value={format}>{format}</option>;
-              }}
-            </For>
-          </select>
-        </div>
-      </form>
-      <Button onClick={onClickChangeFormat}>
-        {isLoading() ? "please wait..." : "change format"}
-      </Button>
-    </Card>
-  );
+	return (
+		<form class="space-y-2 flex flex-col gap-2">
+			<div class="flex gap-2">
+				<Input value={state.destination} placeholder="select save file" />
+				<Button
+					onClick={async () => {
+						await selectSave();
+					}}
+				>
+					select save
+				</Button>
+				<Select
+					onChange={(e) => {
+						if (isSupportedVideoFormat(e.currentTarget.value)) {
+							setState("format", e.currentTarget.value);
+						}
+					}}
+				>
+					<For each={SupportedVideoFormats}>
+						{(format) => {
+							return <option value={format}>{format}</option>;
+						}}
+					</For>
+				</Select>
+			</div>
+			<Button onClick={onClickChangeFormat}>
+				{isLoading() ? "please wait..." : "change format"}
+			</Button>
+		</form>
+	);
 }

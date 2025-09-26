@@ -1,10 +1,10 @@
 import type { ComponentProps } from "solid-js";
 
-interface InputProps extends ComponentProps<"input"> {
+interface SelectProps extends ComponentProps<"select"> {
 	label?: string;
 }
 
-export default function Input(props: InputProps) {
+export default function Select(props: SelectProps) {
 	return (
 		<div class="flex flex-col gap-1 w-full">
 			{props.label && (
@@ -12,15 +12,16 @@ export default function Input(props: InputProps) {
 					{props.label}
 				</label>
 			)}
-			<input
+			<select
 				{...props}
-				class={`flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors
-                 file:border-0 file:bg-transparent file:text-sm file:font-medium
+				class={`flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm
                  placeholder:text-muted-foreground
                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
                  disabled:cursor-not-allowed disabled:opacity-50
                  ${props.class ?? ""}`}
-			/>
+			>
+				{props.children}
+			</select>
 		</div>
 	);
 }
